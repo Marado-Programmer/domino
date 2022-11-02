@@ -1,10 +1,8 @@
 mod components;
-use self::components::{Player, PlayerType, Stone};
+use self::components::{AILvl, Player, PlayerType, Stone};
 use rand::Rng;
 
 const STONE_MAX_DOTS: u8 = 6;
-
-const AMOUNT_STONES: u8 = (STONE_MAX_DOTS + 1) * (STONE_MAX_DOTS + 2) / 2;
 
 #[derive(Debug)]
 pub struct Game {
@@ -24,8 +22,13 @@ impl Game {
         let num_humans = num_humans.unwrap_or(0);
 
         if num_players < num_humans {
-            panic!("Number of human players: 2--{}, you selected {}", num_players, num_humans);
+            panic!(
+                "Number of human players: 2--{}, you selected {}",
+                num_players, num_humans
+            );
         }
+
+        const AMOUNT_STONES: u8 = (STONE_MAX_DOTS + 1) * (STONE_MAX_DOTS + 2) / 2;
 
         let players: Vec<Player> = Vec::with_capacity(num_players as usize);
         let domino_set = Self::new_domino_set(AMOUNT_STONES as usize);
@@ -37,18 +40,26 @@ impl Game {
             playing: 0,
             priority: None,
         };
+
         game.add_players(num_players, num_humans, AMOUNT_STONES);
 
         game.give_initial_stones();
 
         game.create_priority();
 
+        let mut i: u8 = 0;
         loop {
             game.run();
+
+            if i > 7 {
+                game.started = false;
+            }
 
             if !game.started {
                 break;
             }
+
+            i += 1;
         }
     }
 
@@ -75,7 +86,7 @@ impl Game {
                 if i < num_humans {
                     PlayerType::Human
                 } else {
-                    PlayerType::AI(0)
+                    PlayerType::AI(AILvl::Easy)
                 },
                 Vec::with_capacity((num_tiles / num_players) as usize),
             );
@@ -97,7 +108,7 @@ impl Game {
             let i = rand::thread_rng().gen_range(0..self.domino_set.len());
 
             if let Some(_) = self.domino_set[i] {
-                self.players[p].stones.push(self.domino_set[i].take());
+                self.players[p].stones.push(self.domino_set[i]);
                 break;
             }
         }
@@ -119,6 +130,7 @@ impl Game {
                         if s.0 == s.1 && s.0 == i {
                             self.playing = j;
                             self.priority = Some(k);
+                            self.started = true;
                             break 'dots;
                         }
                     }
@@ -135,10 +147,8 @@ impl Game {
         if let Some(priority) = priority {
             p.stones[priority].take();
             return;
-        } else {
-            p.play().take();
         }
 
-        self.started = false;
+        p.play();
     }
 }
