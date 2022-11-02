@@ -51,7 +51,7 @@ impl Game {
         loop {
             game.run();
 
-            if i > 7 {
+            if i > STONE_MAX_DOTS * 3 {
                 game.started = false;
             }
 

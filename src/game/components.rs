@@ -39,6 +39,8 @@ impl Player {
     }
 
     pub fn play(&mut self) -> Option<Stone> {
+        self.sort_stones();
+
         if let PlayerType::AI(lvl) = &self.typ {
             self.ai_play(lvl)
         } else {
@@ -47,11 +49,12 @@ impl Player {
     }
 
     fn human_play(&mut self) -> Option<Stone> {
-        let mut prompt = String::from("Your Stones:");
+        let mut prompt = String::from("Your Stones:\n");
 
-        for i in self.stones.iter().filter(|x| x.is_some()) {
-            let stone = i.unwrap_or_else(|| Stone(u8::MAX, u8::MAX));
-            prompt.push_str(&format!(" {stone}")[..]);
+        for (mut i, s) in self.stones.iter().filter(|x| x.is_some()).enumerate() {
+            i += 1;
+            let stone = s.unwrap_or_else(|| Stone(u8::MAX, u8::MAX));
+            prompt.push_str(&format!("\t{i}: {stone}\n")[..]);
         }
 
         println!("{}", prompt);
@@ -77,12 +80,26 @@ impl Player {
             }
         }
 
-        self.stones[index].take()
+        self.stones[index - 1].take()
     }
 
     fn ai_play(&self, _lvl: &AILvl) -> Option<Stone> {
         //println!("AI Stones: {:?}", self.stones);
 
-        self.stones[3]
+        self.stones[0]
+    }
+
+    fn sort_stones(&mut self) {
+        self.stones.sort_by(|x, y| {
+            if x.is_some() && y.is_none() {
+                return std::cmp::Ordering::Less;
+            }
+
+            if y.is_some() && x.is_none() {
+                return std::cmp::Ordering::Greater;
+            }
+
+            std::cmp::Ordering::Equal
+        });
     }
 }
