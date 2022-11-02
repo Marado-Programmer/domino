@@ -1,2 +1,2 @@
 # domino
-Dominoes on the CLI
+Dominoes on the CLI. **UNPLAYABLE**
