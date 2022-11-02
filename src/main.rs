@@ -28,9 +28,9 @@ mod game {
 
         #[derive(Debug)]
         pub struct Player {
-            id: usize,
+            pub id: usize,
             typ: PlayerType,
-            stones: Vec<Option<Stone>>,
+            pub stones: Vec<Option<Stone>>,
             game: *mut Game,
         }
 
@@ -78,13 +78,13 @@ mod game {
     pub struct Game {
         domino_set: Vec<Option<Stone>>,
         players: Vec<Player>,
-        pub started: bool,
+        started: bool,
         playing: usize,
         priority: Option<usize>,
     }
 
     impl Game {
-        pub fn start(num_players: u8, num_humans: Option<u8>) -> Self {
+        pub fn start(num_players: u8, num_humans: Option<u8>) {
             if num_players < 2 || num_players > 4 {
                 println!("END PROGRAM!");
             }
@@ -117,7 +117,13 @@ mod game {
 
             game.create_priority();
 
-            game
+            loop {
+                game.run();
+
+                if !game.started {
+                    break;
+                }
+            }
         }
 
         fn new_domino_set(size: usize) -> Vec<Option<Stone>> {
@@ -153,6 +159,7 @@ mod game {
             for p in &self.players {
                 for _ in 1..=7 {
                     p.pick();
+                    //self.give_stone(p);
                 }
             }
         }
@@ -192,7 +199,7 @@ mod game {
             }
         }
 
-        pub fn run(&mut self) {
+        fn run(&mut self) {
             let priority = self.priority.take();
 
             let p = self.player_playing();
@@ -210,13 +217,5 @@ mod game {
 }
 
 fn main() {
-    let mut game = game::Game::start(2, Some(1));
-
-    loop {
-        game.run();
-
-        if !game.started {
-            break;
-        }
-    }
+    game::Game::start(2, Some(1));
 }
