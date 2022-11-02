@@ -1,4 +1,3 @@
-use super::Game;
 use std::fmt::Debug;
 
 #[derive(Clone, Copy)]
@@ -18,19 +17,15 @@ pub enum PlayerType {
 
 #[derive(Debug)]
 pub struct Player {
-    pub id: usize,
     typ: PlayerType,
     pub stones: Vec<Option<Stone>>,
-    game: *mut Game,
 }
 
 impl Player {
-    pub fn new(id: usize, typ: PlayerType, stones: Vec<Option<Stone>>, game: *mut Game) -> Self {
+    pub fn new(typ: PlayerType, stones: Vec<Option<Stone>>) -> Self {
         Player {
-            id,
             typ,
             stones,
-            game
         }
     }
 
@@ -51,13 +46,4 @@ impl Player {
     fn ai_play(&self) -> Option<Stone> {
         self.stones[3]
     }
-
-    pub fn pick(&self) {
-        unsafe {
-            let game = &mut *self.game;
-
-            game.give_stone(self);
-        }
-    }
 }
-

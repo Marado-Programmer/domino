@@ -1,5 +1,5 @@
-use std::error::Error;
 use crate::game::Game;
+use std::error::Error;
 
 pub mod game;
 
